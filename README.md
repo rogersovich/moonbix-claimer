@@ -46,3 +46,7 @@ if your bot get eror, with some error code `401` it mean your query expired, go 
 ## Support
 
 To support me please give me ⭐ in this github repository. Thank you semoga pada JP 🔥
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
