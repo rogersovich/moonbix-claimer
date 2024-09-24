@@ -1,0 +1,28 @@
+{
+  "name": "moonbix-bot",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "BOT",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "start:play": "node index.js --play",
+    "test": "node test.js"
+  },
+  "keywords": [
+    "bot",
+    "moonbix",
+    "moonbix-mining",
+    "moonbix-claimer",
+    "moonbix-github"
+  ],
+  "author": "Rogersovich",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "chalk": "^5.3.0",
+    "figlet": "^1.7.0",
+    "https-proxy-agent": "^7.0.5",
+    "node-fetch": "^3.3.2"
+  }
+}
