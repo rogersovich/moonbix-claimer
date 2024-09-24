@@ -158,7 +158,7 @@ export class GamesAPI extends API {
           if (await this.completeGame()) {
             this.game_ticket -= 1;
             await logDelay(
-              `🎯 Game: Tickets remaining: ${this.game_ticket}`,
+              `🎯 Game: Tickets remaining: ${this.game_ticket}/6`,
               1000,
               this.account_name,
               "info"
