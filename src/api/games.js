@@ -74,39 +74,42 @@ export class GamesAPI extends API {
   }
 
   async getTaskList() {
-    return new Promise(async (resolve, reject) => {
-      try {
-        await logDelay(
-          `🃏 Task: Fetching API Tasks`,
-          1000,
-          this.account_name,
-          "info"
-        );
-        const url = `${this.base_url}/friendly/growth-paas/mini-app-activity/third-party/task/list`;
+    return this.retryApiCall(
+      async () => await this.runGetTaskList(),
+      3, // max retries
+      1000, // delay between retries
+      this.account_name // account name for logging
+    );
+  }
 
-        const data = await this.fetch(url, "POST", this.access_token, {
-          resourceId: 2056,
-        });
+  async runGetTaskList(){
+    await logDelay(
+      `🃏 Task: Fetching API Tasks`,
+      1000,
+      this.account_name,
+      "info"
+    );
+    const url = `${this.base_url}/friendly/growth-paas/mini-app-activity/third-party/task/list`;
 
-        if (data.code !== "000000" || !data.success) {
-          throw new Error(`🤖 Cannot get task list: ${data.message}`);
-        }
-
-        //? Extracting task list
-        const taskList = data?.data?.data[0]?.taskList?.data || [];
-
-        //? Returning resourceIds of incomplete tasks
-        const filteredTask = taskList
-          .filter((task) => task.completedCount === 0)
-          .map((task) => task.resourceId);
-
-        this.tasks = filteredTask;
-
-        resolve();
-      } catch (error) {
-        reject(`🤖 API call failed: ${error}`);
-      }
+    const data = await this.fetch(url, "POST", this.access_token, {
+      resourceId: 2056,
     });
+
+    if (data.code !== "000000" || !data.success) {
+      throw new Error(`🤖 Cannot get task list: ${data.message}`);
+    }
+
+    //? Extracting task list
+    const taskList = data?.data?.data[0]?.taskList?.data || [];
+
+    //? Returning resourceIds of incomplete tasks
+    const filteredTask = taskList
+      .filter((task) => task.completedCount === 0)
+      .map((task) => task.resourceId);
+
+    this.tasks = filteredTask;
+
+    return data;
   }
 
   async postCompleteTask(resourceId) {
@@ -290,4 +293,30 @@ export class GamesAPI extends API {
       return false
     }
   }
+
+  async retryApiCall(apiCall, retries = 3, delayTime = 1000, accountName = '') {
+    let attempt = 0;
+    
+    while (attempt < retries) {
+      try {
+        return await apiCall();
+      } catch (error) {
+        if (error.includes('504') || error.includes('502')) {
+          attempt++;
+          await logDelay(
+            `🤖 API call failed: ${error}, retrying... (${attempt}/${retries})`,
+            delayTime,
+            accountName,
+            'error'
+          );
+          await delay(delayTime);
+        } else {
+          throw error;
+        }
+      }
+    }
+    
+    throw new Error(`🤖 API call failed after ${retries} attempts.`);
+  }
+  
 }

@@ -2,6 +2,8 @@
 
 Moonbix is telegram web app mining on telegram
 
+![Moonbix Bot](./src/assets/moonbix-banner.jpg)
+
 ## Prerequisite
 
 - Node JS (v14)
