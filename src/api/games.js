@@ -161,7 +161,7 @@ export class GamesAPI extends API {
               `🎯 Game: Tickets remaining: ${this.game_ticket}/6`,
               1000,
               this.account_name,
-              "info"
+              "warning"
             );
           } else {
             await logDelay(
