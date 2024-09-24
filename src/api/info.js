@@ -81,7 +81,9 @@ export class Moonbix extends API {
         const metaInfo = data.data.metaInfo
         const availableTickets = (metaInfo.totalAttempts || 0) - (metaInfo. consumedAttempts || 0)
         const refreshTicket = metaInfo.attemptRefreshCountDownTime || 0
-        const attemptTime =  refreshTicket + (480000 * 5)
+        //? 10 Menit
+        const refreshOneTicket = 10 * 60 * 1000
+        const attemptTime =  refreshTicket + (refreshOneTicket * 5 - availableTickets)
         const formatRefreshTicket = refreshTicket != 0 ? this.formatTimeFromNow(attemptTime) : "N/A"
         let refreshTicketDate = null
 
