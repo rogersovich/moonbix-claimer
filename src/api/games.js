@@ -1,6 +1,6 @@
 import axios from "axios";
 import { API } from "./api.js";
-import { logDelay } from "../config/helpers.js";
+import { delay, logDelay } from "../config/helpers.js";
 
 export class GamesAPI extends API {
   constructor(moonbix) {
@@ -143,13 +143,7 @@ export class GamesAPI extends API {
 
   async autoPlayGame() {
     while (this.game_ticket > 0) {
-      await logDelay(
-        `🎯 Game: Starting game with ${this.game_ticket}`,
-        1000,
-        this.account_name,
-        "info"
-      );
-
+      await delay(1000);
       if (await this.startGame()) {
         if (await this.gameData()) {
           await logDelay(
