@@ -31,7 +31,7 @@ export class GamesAPI extends API {
         `🃏 Task: No incomplete tasks`,
         1000,
         this.account_name,
-        "info"
+        "warning"
       );
       return;
     }
@@ -52,14 +52,14 @@ export class GamesAPI extends API {
           `🃏 Task: Complete task - ${resourceId}`,
           2000,
           this.account_name,
-          "info"
+          "success"
         );
       } else {
         await logDelay(
           `🃏 Task: Uncomplete task - ${resourceId}`,
           2000,
           this.account_name,
-          "info"
+          "error"
         );
       }
 
@@ -68,7 +68,7 @@ export class GamesAPI extends API {
         `🤖 BOT: Sleep in 3 seconds`,
         3000,
         this.account_name,
-        "info"
+        "warning"
       );
     }
   }

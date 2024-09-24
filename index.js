@@ -65,7 +65,7 @@ const runBulkGame = async function(data) {
     const mooonbix = new Moonbix(data.name, data.query, proxy);
 
     await mooonbix.getAccessToken()
-    await mooonbix.getUserInfo()
+    await mooonbix.getUserInfo(true)
 
     const GameAPI = new GamesAPI(mooonbix);
 
@@ -77,7 +77,10 @@ const runBulkGame = async function(data) {
       await GameAPI.autoPlayGame();
     }
 
-    await logDelay(`✅ Account Processing Complete`, 1000, data.name, 'info');
+    await mooonbix.getUserInfo()
+
+    await logDelay(`✅ Account Processing Complete`, 1000, data.name, 'success');
+    await logDelay(`⛏️ Next Ticket in ${mooonbix.game_refresh_ticket.date}`, 1000, data.name, 'warning');
     await logDelay(`💤 Sleep ${mooonbix.game_refresh_ticket.message}`, mooonbix.game_refresh_ticket.time, data.name, 'info');
 
     await runBulkGame(data);

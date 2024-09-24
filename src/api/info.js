@@ -17,7 +17,8 @@ export class Moonbix extends API {
     this.game_traps = []
     this.game_refresh_ticket = {
       message: null,
-      time: 0
+      time: 0,
+      date: null
     }
     this.base_url = 'https://www.binance.com/bapi/growth/v1'
   }
@@ -55,11 +56,13 @@ export class Moonbix extends API {
     });
   }
 
-  async getUserInfo() {
+  async getUserInfo(with_msg = false) {
     return new Promise(async (resolve, reject) => {
       try {
 
-        await logDelay(`🗝️ Auth: Get user info`, 1000, this.account_name, 'info');
+        if(with_msg){
+          await logDelay(`🗝️ Auth: Get user info`, 1000, this.account_name, 'info');
+        }
         const userInfoUrl = `${this.base_url}/friendly/growth-paas/mini-app-activity/third-party/user/user-info`;
        
         const data = await this.fetch(
@@ -80,16 +83,23 @@ export class Moonbix extends API {
         const refreshTicket = metaInfo.attemptRefreshCountDownTime || 0
         const attemptTime =  refreshTicket + (480000 * 5)
         const formatRefreshTicket = refreshTicket != 0 ? this.formatTimeFromNow(attemptTime) : "N/A"
+        let refreshTicketDate = null
+
+        if(refreshTicket != 0){
+          refreshTicketDate = this.formatDateTimeFromNow(attemptTime)
+        }
 
         this.game_refresh_ticket = {
           message: formatRefreshTicket,
-          time: attemptTime
+          time: attemptTime,
+          date: refreshTicketDate
         }
         this.game_ticket = availableTickets
 
-        await logDelay(`🪙 Balance: ${metaInfo.totalGrade}`, 500, this.account_name, 'success');
-        await logDelay(`🃏 Tickets Available: ${availableTickets}`, 500, this.account_name, 'success');
-        await logDelay(`🃏 Tickets Refresh: ${formatRefreshTicket}`, 500, this.account_name, 'success');
+        if(with_msg){
+          await logDelay(`🪙 Balance: ${metaInfo.totalGrade}`, 500, this.account_name, 'success');
+          await logDelay(`🃏 Tickets Available: ${availableTickets}/6`, 500, this.account_name, 'success');
+        }
         
         resolve();
       } catch (error) {
@@ -107,11 +117,25 @@ export class Moonbix extends API {
     const diffInHours = Math.floor(diffInMinutes / 60);
   
     if (diffInMinutes < 1) {
-      return `${diffInSeconds} seconds again`;
+      return `${diffInSeconds} seconds`;
     } else if (diffInMinutes < 60) {
-      return `${diffInMinutes} minutes again`;
+      return `${diffInMinutes} minutes`;
     } else {
-      return `${diffInHours} hours again`;
+      return `${diffInHours} hours`;
     }
+  }
+
+  formatDateTimeFromNow(future_ms) {
+    const now = new Date();
+    const futureTime = new Date(now.getTime() + future_ms);
+  
+    const day = String(futureTime.getDate()).padStart(2, '0');
+    const month = String(futureTime.getMonth() + 1).padStart(2, '0'); // Karena bulan dimulai dari 0
+    const year = futureTime.getFullYear();
+    
+    const hours = String(futureTime.getHours()).padStart(2, '0');
+    const minutes = String(futureTime.getMinutes()).padStart(2, '0');
+  
+    return `${day}-${month}-${year} ${hours}:${minutes}`;
   }
 }
