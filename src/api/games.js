@@ -223,6 +223,8 @@ export class GamesAPI extends API {
     }
   }
 
+
+  //! Not Used
   async gameData() {
     const url =
       "https://moonbix-server-9r08ifrt4-scriptvips-projects.vercel.app/moonbix/api/v1/play";
@@ -282,59 +284,11 @@ export class GamesAPI extends API {
         await logDelay(`🎯 Game: Completed game | Received ${score} points`, 1000, this.account_name, 'custom');
         return true;
       } else {
-        await logDelay(`🎯 Game: Cannot complete game v2 ${data.message}`, 1000, this.account_name, 'error');
         return false;
       }
     } catch (error) {
       await logDelay(`🎯 Game: Error completing game ${error.message}`, 1000, this.account_name, 'error');
       return false
-    }
-  }
-
-  async axiosCompleteGame(payload, point){
-    const url = "https://www.binance.com/bapi/growth/v1/friendly/growth-paas/mini-app-activity/third-party/game/complete";
-    
-    const requestData = {
-        resourceId: 2056,
-        payload: payload,
-        log: point,
-    };
-
-    const headers = {
-        'X-Growth-Token': this.access_token,
-        "Accept": "*/*",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Accept-Language": "vi-VN,vi;q=0.9,fr-FR;q=0.8,fr;q=0.7,en-US;q=0.6,en;q=0.5",
-        "Content-Type": "application/json",
-        "Origin": "https://www.binance.com",
-        "Referer": "https://www.binance.com/vi/game/tg/moon-bix",
-        "Sec-Ch-Ua": '"Not/A)Brand";v="99", "Google Chrome";v="115", "Chromium";v="115"',
-        "Sec-Ch-Ua-Mobile": "?1",
-        "Sec-Ch-Ua-Platform": '"Android"',
-        "User-Agent": getRandomUserAgent(),
-    };
-
-    const axiosConfig = {
-      headers: headers,
-      timeout: 20000, // 20 seconds timeout
-    };
-
-    try {
-      const response = await axios.post(url, requestData, axiosConfig);
-      
-      const status = response.data.success;
-      return status;
-    } catch (error) {
-      console.error('Error occurred:', error.message);
-      if (error.response) {
-          console.error('Response data:', error.response.data);
-          console.error('Response status:', error.response.status);
-          console.error('Response headers:', error.response.headers);
-      } else if (error.request) {
-          console.error('No response received:', error.request);
-      } else {
-          console.error('Error setting up the request:', error.message);
-      }
     }
   }
 
