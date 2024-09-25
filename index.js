@@ -17,10 +17,6 @@ const CONFIG_PATH = path.join(__dirname, 'config.json');
 const ACCOUNT_PATH = path.join(__dirname, 'account.json');
 const PROXY_FILE = path.join(__dirname, 'proxy.txt');
 
-// Declare Variable globally
-let GLOBAL_NAME = null;
-let GLOBAL_TRAP_ITEMS = [];
-
 // Initialize config
 let config = {
   auto_task: true,
@@ -47,18 +43,8 @@ const arrayAccounts = Object.entries(accounts).map(([name, query]) => ({
 //! Under development
 const proxies = fs.existsSync(PROXY_FILE) ? fs.readFileSync(PROXY_FILE, 'utf-8').split('\n').filter(line => line.trim()) : [];
 
-//! Under development
-const identifyTrapItems = async function (gameConfig) {
-  gameConfig.itemSettingList?.forEach(item => {
-      if (item.type === 'TRAP') {
-        GLOBAL_TRAP_ITEMS.push(item);
-      }
-  });
-  await logDelay(`🎯 Game: Identified ${GLOBAL_TRAP_ITEMS.length} traps to avoid`, 1000, GLOBAL_NAME, 'warning');
-}
-
 //todo Function to Running Game
-const runBulkGame = async function(data) {
+const runBulkGame = async function(data, skip_task = false) {
   const proxy = null
 
   try {
@@ -69,8 +55,10 @@ const runBulkGame = async function(data) {
 
     const GameAPI = new GamesAPI(mooonbix);
 
-    if (config.auto_task) {
-      await GameAPI.startCompleteTasks();
+    if(!skip_task){
+      if (config.auto_task) {
+        await GameAPI.startCompleteTasks();
+      }
     }
 
     if (config.auto_game) {
@@ -83,7 +71,7 @@ const runBulkGame = async function(data) {
     await logDelay(`⛏️ Next Ticket in ${mooonbix.game_refresh_ticket.date}`, 1000, data.name, 'warning');
     await logDelay(`💤 Sleep ${mooonbix.game_refresh_ticket.message}`, mooonbix.game_refresh_ticket.time, data.name, 'info');
 
-    await runBulkGame(data);
+    await runBulkGame(data, true)
 
   } catch (error) {
     log(`${error}`, data.name, 'error');
