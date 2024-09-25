@@ -1,6 +1,7 @@
 import axios from "axios";
 import { API } from "./api.js";
-import { delay, logDelay } from "../config/helpers.js";
+import { delay, logDelay, getRandomUserAgent, log } from "../config/helpers.js";
+import { getGameData } from "../config/encrypt.js"
 
 export class GamesAPI extends API {
   constructor(moonbix) {
@@ -145,14 +146,15 @@ export class GamesAPI extends API {
     while (this.game_ticket > 0) {
       await delay(1000);
       if (await this.startGame()) {
-        if (await this.gameData()) {
+        const {score, encryptedPayload} = getGameData(this.game_response)
+        if (encryptedPayload) {
           await logDelay(
             `🎯 Game: Playing game in 45 seconds`,
-            45000,
+            60000,
             this.account_name,
             "info"
           );
-          if (await this.completeGame()) {
+          if (await this.completeGame(encryptedPayload, score)) {
             this.game_ticket -= 1;
             await logDelay(
               `🎯 Game: Tickets remaining: ${this.game_ticket}/6`,
@@ -171,7 +173,7 @@ export class GamesAPI extends API {
         } else {
           await logDelay(
             `🎯 Game: Cannot receive game data`,
-            1000,
+            3000,
             this.account_name,
             "error"
           );
@@ -249,7 +251,7 @@ export class GamesAPI extends API {
       } else {
         await logDelay(
           `🎯 Game: Error receiving game data ${data.message}`,
-          1000,
+          3000,
           this.account_name,
           "error"
         );
@@ -258,7 +260,7 @@ export class GamesAPI extends API {
     } catch (error) {
       await logDelay(
         `🎯 Game: Error receiving game data ${error.message}`,
-        1000,
+        3000,
         this.account_name,
         "error"
       );
@@ -266,25 +268,73 @@ export class GamesAPI extends API {
     }
   }
 
-  async completeGame() {
+  async completeGame(payload, score) {
     try {
       const url = `${this.base_url}/friendly/growth-paas/mini-app-activity/third-party/game/complete`;
-      const data = await this.fetch(url, "POST", this.access_token, {
+      const body = {
         resourceId: 2056,
-        payload: this.game_data?.payload,
-        log: this.game_data?.log,
-      });
+        payload: payload,
+        log: score
+      }
+      const data = await this.fetch(url, "POST", this.access_token, body);
   
       if (data.code === "000000" && data.success) {
-        await logDelay(`🎯 Game: Completed game | Received ${this.game_data?.log} points`, 1000, this.account_name, 'custom');
+        await logDelay(`🎯 Game: Completed game | Received ${score} points`, 1000, this.account_name, 'custom');
         return true;
       } else {
-        await logDelay(`🎯 Game: Cannot complete game ${data.message}`, 1000, this.account_name, 'error');
+        await logDelay(`🎯 Game: Cannot complete game v2 ${data.message}`, 1000, this.account_name, 'error');
         return false;
       }
     } catch (error) {
       await logDelay(`🎯 Game: Error completing game ${error.message}`, 1000, this.account_name, 'error');
       return false
+    }
+  }
+
+  async axiosCompleteGame(payload, point){
+    const url = "https://www.binance.com/bapi/growth/v1/friendly/growth-paas/mini-app-activity/third-party/game/complete";
+    
+    const requestData = {
+        resourceId: 2056,
+        payload: payload,
+        log: point,
+    };
+
+    const headers = {
+        'X-Growth-Token': this.access_token,
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Language": "vi-VN,vi;q=0.9,fr-FR;q=0.8,fr;q=0.7,en-US;q=0.6,en;q=0.5",
+        "Content-Type": "application/json",
+        "Origin": "https://www.binance.com",
+        "Referer": "https://www.binance.com/vi/game/tg/moon-bix",
+        "Sec-Ch-Ua": '"Not/A)Brand";v="99", "Google Chrome";v="115", "Chromium";v="115"',
+        "Sec-Ch-Ua-Mobile": "?1",
+        "Sec-Ch-Ua-Platform": '"Android"',
+        "User-Agent": getRandomUserAgent(),
+    };
+
+    const axiosConfig = {
+      headers: headers,
+      timeout: 20000, // 20 seconds timeout
+    };
+
+    try {
+      const response = await axios.post(url, requestData, axiosConfig);
+      
+      const status = response.data.success;
+      return status;
+    } catch (error) {
+      console.error('Error occurred:', error.message);
+      if (error.response) {
+          console.error('Response data:', error.response.data);
+          console.error('Response status:', error.response.status);
+          console.error('Response headers:', error.response.headers);
+      } else if (error.request) {
+          console.error('No response received:', error.request);
+      } else {
+          console.error('Error setting up the request:', error.message);
+      }
     }
   }
 
