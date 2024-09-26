@@ -44,9 +44,7 @@ const arrayAccounts = Object.entries(accounts).map(([name, query]) => ({
 const proxies = fs.existsSync(PROXY_FILE) ? fs.readFileSync(PROXY_FILE, 'utf-8').split('\n').filter(line => line.trim()) : [];
 
 //todo Function to Running Game
-const runBulkGame = async function(data, skip_task = false) {
-  const proxy = null
-
+const runBulkGame = async function(data, proxy, skip_task = false) {
   try {
     const mooonbix = new Moonbix(data.name, data.query, proxy);
 
@@ -71,7 +69,7 @@ const runBulkGame = async function(data, skip_task = false) {
     await logDelay(`⛏️ Next Ticket in ${mooonbix.game_refresh_ticket.date}`, 1000, data.name, 'warning');
     await logDelay(`💤 Sleep ${mooonbix.game_refresh_ticket.message}`, mooonbix.game_refresh_ticket.time, data.name, 'info');
 
-    await runBulkGame(data, true)
+    await runBulkGame(data, proxy, true)
 
   } catch (error) {
     log(`${error}`, data.name, 'error');
@@ -106,8 +104,9 @@ const showBanner = async () => {
 async function main() {
   await showBanner()
 
-  const promiseList = arrayAccounts.map(async (data) => {
-    await runBulkGame(data);
+  const promiseList = arrayAccounts.map((data, index) => {
+    const proxy = proxies[index] || null
+    return runBulkGame(data, proxy, index);
   });
 
   await Promise.all(promiseList);

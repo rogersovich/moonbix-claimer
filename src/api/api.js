@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
 import { getRandomUserAgent } from "../config/helpers.js";
 import { HttpsProxyAgent } from "https-proxy-agent";
+import logger from "../config/logger.js";
 
 export class API {
   constructor(proxy) {
@@ -48,13 +49,13 @@ export class API {
         ip = await this.checkIP();
       }
 
-      // logger.info(
-      //   `${method} : ${url} ${
-      //     this.proxy
-      //       ? `(Requester : Original IP : ${ip[0]} : Proxy IP ${ip[1]})`
-      //       : ``
-      //   }`
-      // );
+      logger.info(
+        `${method} : ${url} ${
+          this.proxy
+            ? `(Requester : Original IP : ${ip[0]} : Proxy IP ${ip[1]})`
+            : ``
+        }`
+      );
 
       if (method !== "GET") {
         if (body != {}) {

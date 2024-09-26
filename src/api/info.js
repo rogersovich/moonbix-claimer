@@ -3,7 +3,7 @@ import { logDelay } from "../config/helpers.js";
 
 export class Moonbix extends API {
   constructor(name, query, proxy) {
-    super()
+    super(proxy)
 
     this.proxy = proxy;
     this.query = query

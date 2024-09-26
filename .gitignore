@@ -2,3 +2,5 @@ node_modules
 account.json
 .DS_Store
 package-lock.json
+log/app.log
+./proxy.txt
