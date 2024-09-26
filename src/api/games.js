@@ -49,12 +49,21 @@ export class GamesAPI extends API {
       const success = await this.postCompleteTask(resourceId);
 
       if (success) {
-        await logDelay(
-          `🃏 Task: Complete task - ${resourceId}`,
-          2000,
-          this.account_name,
-          "success"
-        );
+        if(resourceId == 2057){
+          await logDelay(
+            `🃏 Task: Successfully Check-in`,
+            2000,
+            this.account_name,
+            "custom"
+          );
+        }else{
+          await logDelay(
+            `🃏 Task: Complete task - ${resourceId}`,
+            2000,
+            this.account_name,
+            "success"
+          );
+        }
       } else {
         await logDelay(
           `🃏 Task: Uncomplete task - ${resourceId}`,
@@ -100,12 +109,13 @@ export class GamesAPI extends API {
       throw new Error(`🤖 Cannot get task list: ${data.message}`);
     }
 
+    
     //? Extracting task list
     const taskList = data?.data?.data[0]?.taskList?.data || [];
 
     //? Returning resourceIds of incomplete tasks
     const filteredTask = taskList
-      .filter((task) => task.completedCount === 0)
+      .filter((task) => (task.type === 'LOGIN' && task.status === 'IN_PROGRESS') || task.completedCount === 0)
       .map((task) => task.resourceId);
 
     this.tasks = filteredTask;
@@ -115,12 +125,23 @@ export class GamesAPI extends API {
 
   async postCompleteTask(resourceId) {
     try {
-      await logDelay(
-        `🃏 Task: Start task - ${resourceId}`,
-        1000,
-        this.account_name,
-        "info"
-      );
+
+      if(resourceId == 2057){
+
+        await logDelay(
+          `🃏 Task: Try to Check-in`,
+          1000,
+          this.account_name,
+          "custom"
+        );
+      }else{
+        await logDelay(
+          `🃏 Task: Start task - ${resourceId}`,
+          1000,
+          this.account_name,
+          "info"
+        );
+      }
       const url = `${this.base_url}/friendly/growth-paas/mini-app-activity/third-party/task/complete`;
 
       const data = await this.fetch(url, "POST", this.access_token, {
@@ -132,9 +153,7 @@ export class GamesAPI extends API {
         throw new Error(`⚠️ Cannot complete task: ${data.message}`);
       }
 
-      resolve(data.success);
-
-      return data
+      return data.success
     } catch (error) {
       throw new Error(`⚠️ Error completing task: ${error.message}`);
     }
